@@ -27,7 +27,10 @@ void download_from_file(FILE* file, int max_processes) {
     size_t num_chars = 0;
     int fork_cnt = 0;
     int status;
+    pid_t pid;
+    int line_num = 0;
     while (getline(&line, &num_chars, file) > 0) {
+        ++line_num;
         char* name = strtok(line, " \n");
         char* url = strtok(NULL, " \n");
         char* time = strtok(NULL, " \n");
@@ -37,7 +40,9 @@ void download_from_file(FILE* file, int max_processes) {
             fork_cnt--;
         }
         fork_cnt++;
-        if (fork() == 0) {
+        pid = fork();
+        if (pid != 0) printf("Starting download for \033[33m%s\033[0m under process \033[33m#%d\033[0m for line \033[33m%d\033[0m\n", name, pid,line_num);
+        if (pid == 0) {
             if (execlp("curl", "curl", "-m", time, "-o", name, "-s", url, (char*) NULL) == -1) {
                 perror("Download execlp");
                 exit(1);
