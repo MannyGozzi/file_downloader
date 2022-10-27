@@ -22,11 +22,20 @@ FILE* get_file(char* filename) {
     return file;
 }
 
+void wait_and_print_pid_status() {
+    int status;
+    pid_t pid = wait(&status);
+    if (pid != -1 && WIFEXITED(status)) {
+            printf("Download for process \033[33m#%d\033[0m \033[32mcompleted\033[0m\n", pid);
+    } else {
+        printf("A process \033[31mfailed\033[0m\n");
+    }
+}
+
 void download_from_file(FILE* file, int max_processes) {
     char* line = NULL;
     size_t num_chars = 0;
     int fork_cnt = 0;
-    int status;
     pid_t pid;
     int line_num = 0;
     while (getline(&line, &num_chars, file) > 0) {
@@ -36,12 +45,15 @@ void download_from_file(FILE* file, int max_processes) {
         char* time = strtok(NULL, " \n");
         if (time == NULL) time = "10";
         if (fork_cnt >= max_processes) {
-            wait(&status);
+            wait_and_print_pid_status();
             fork_cnt--;
         }
         fork_cnt++;
         pid = fork();
-        if (pid != 0) printf("Starting download for \033[33m%s\033[0m under process \033[33m#%d\033[0m for line \033[33m%d\033[0m\n", name, pid,line_num);
+        if (pid != 0) {
+            printf("=> Starting download for \033[33m%s\033[0m", name);
+            printf(" under process \033[33m#%d\033[0m for line \033[36m%d\033[0m\n", pid, line_num);
+        }
         if (pid == 0) {
             if (execlp("curl", "curl", "-m", time, "-o", name, "-s", url, (char*) NULL) == -1) {
                 perror("Download execlp");
@@ -51,7 +63,7 @@ void download_from_file(FILE* file, int max_processes) {
     }
     free(line);
     while(fork_cnt != 0) {
-        wait(&status);
+        wait_and_print_pid_status();
         fork_cnt--;
     }
 }
