@@ -36,13 +36,13 @@ void wait_and_print_pid_status(struct array_list *pids, struct array_list *line_
     int line_num = get_element(line_indicies, find_element(pids, pid));
     if (WEXITSTATUS(status) == EXIT_SUCCESS)
     {  
-        printf("Process \033[33m#%d\033[0m \033[32mcompleted\033[0m downloading for line \033[36m%d\033[0m\n", pid, line_num);
+        printf("Process \033[33m#%d\033[0m \033[32mCompleted\033[0m downloading for line \033[36m%d\033[0m\n", pid, line_num);
     }
     else if (pid != -1)
     {
-        printf("Process \033[33m#%d\033[0m \033[31mfailed\033[0m to download correctly for line \033[36m%d\033[0m\n", pid, line_num);
+        printf("Process \033[33m#%d\033[0m \033[31mFailed\033[0m to download for line \033[36m%d\033[0m\n", pid, line_num);
     } else {
-        printf("An unknown process \033[31mfailed\033[0m to download correctly\n");
+        printf("An unknown process \033[31mFailed\033[0m to correctly\n");
     }
 }
 
@@ -96,6 +96,9 @@ void download_from_file(FILE *file, int max_processes)
         wait_and_print_pid_status(pids, line_indicies);
         fork_cnt--;
     }
+    // cleanup 
+    destroy_array_list(pids);
+    destroy_array_list(line_indicies);
 }
 
 int main(int argc, char *argv[])
