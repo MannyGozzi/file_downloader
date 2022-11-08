@@ -106,6 +106,10 @@ int main(int argc, char *argv[])
     validate_args(argc, argv);
     FILE *file = get_file(argv[FILENAME_POS]);
     int MAX_PROCESSES = atoi(argv[MAX_PROCESS_POS]);
+    if (MAX_PROCESSES < 1) {
+        printf("\033[33mWARNING:\033[0m Process limit can't be less than 1. Defaulting to 1...\n");
+        MAX_PROCESSES = 1;
+    }
     download_from_file(file, MAX_PROCESSES);
     fclose(file);
     return 0;
